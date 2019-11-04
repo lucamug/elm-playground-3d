@@ -1,0 +1,22 @@
+{
+  "name": "elm-playground-3d",
+  "version": "1.0.0",
+  "description": "A simple way to create three-dimensional pictures, animations, and games.",
+  "main": "index.js",
+  "repository": "https://github.com/lucamug/elm-playground-3d",
+  "directories": {
+    "doc": "docs"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "elm": "^0.19.0",
+    "elm-live": "^4.0.1",
+    "html-minifier": "^4.0.0",
+    "uglifyjs": "^2.4.11"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Luca Mugnaini",
+  "license": "BSD-3-Clause"
+}

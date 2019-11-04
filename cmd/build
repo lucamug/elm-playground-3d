@@ -1,0 +1,41 @@
+#!/bin/bash
+set -e
+
+cmd/reset | true
+
+printf "\n\e[0;32m🍣   Removing build folder...\e[0m\n\n"
+
+rm -rf build
+mkdir build
+mkdir build/TEMP
+
+printf "\n\e[0;32m🍣   Copying files...\e[0m\n\n"
+
+cp -r docs/images build/
+
+cp docs/index.html  build/TEMP/temp.html
+node_modules/.bin/html-minifier -o build/index.html build/TEMP/temp.html --remove-comments --collapse-whitespace --minify-css --minify-js --preserve-line-breaks
+# Remove empy lines
+# node_modules/.bin/replace '^(?:[\t ]*(?:\r?\n|\r))+' '' build/index.html -m -i
+
+cp docs/example1-picture.html  build/TEMP/temp.html
+node_modules/.bin/html-minifier -o build/example1-picture.html build/TEMP/temp.html --remove-comments --collapse-whitespace --minify-css --minify-js --preserve-line-breaks
+
+cp docs/example2-animation.html  build/TEMP/temp.html
+node_modules/.bin/html-minifier -o build/example2-animation.html build/TEMP/temp.html --remove-comments --collapse-whitespace --minify-css --minify-js --preserve-line-breaks
+
+cp docs/example3-game.html  build/TEMP/temp.html
+node_modules/.bin/html-minifier -o build/example3-game.html build/TEMP/temp.html --remove-comments --collapse-whitespace --minify-css --minify-js --preserve-line-breaks
+
+node_modules/.bin/elm make examples/Example1Picture.elm --output=build/TEMP/temp.js  --optimize
+node_modules/.bin/uglifyjs build/TEMP/temp.js  --compress 'pure_funcs="F2,F3,F4,F5,F6,F7,F8,F9,A2,A3,A4,A5,A6,A7,A8,A9",pure_getters,keep_fargs=false,unsafe_comps,unsafe' | node_modules/.bin/uglifyjs --mangle --output=build/example1-picture.js
+
+node_modules/.bin/elm make examples/Example2Animation.elm --output=build/TEMP/temp.js  --optimize
+node_modules/.bin/uglifyjs build/TEMP/temp.js  --compress 'pure_funcs="F2,F3,F4,F5,F6,F7,F8,F9,A2,A3,A4,A5,A6,A7,A8,A9",pure_getters,keep_fargs=false,unsafe_comps,unsafe' | node_modules/.bin/uglifyjs --mangle --output=build/example2-animation.js
+
+node_modules/.bin/elm make examples/Example3Game.elm --output=build/TEMP/temp.js  --optimize
+node_modules/.bin/uglifyjs build/TEMP/temp.js  --compress 'pure_funcs="F2,F3,F4,F5,F6,F7,F8,F9,A2,A3,A4,A5,A6,A7,A8,A9",pure_getters,keep_fargs=false,unsafe_comps,unsafe' | node_modules/.bin/uglifyjs --mangle --output=build/example3-game.js
+
+printf "\n\e[0;32m🍣   Cleaning up...\e[0m\n\n"
+
+rm -rf build/TEMP

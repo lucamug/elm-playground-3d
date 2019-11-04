@@ -1,0 +1,4 @@
+#!/bin/bash
+set -e
+
+node_modules/.bin/surge ./build elm-playground-3d.surge.sh
