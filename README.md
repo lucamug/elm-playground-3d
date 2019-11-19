@@ -1,8 +1,8 @@
 # elm-playground-3d
 
-![Floating City - Tokyo](https://elm-playground-3d.netlify.com/images/968315a2-4e5f-4038-bad9-795e5cadf254.png)
+## Detailed post in Medium: [Basic 3D rendering in SVG: elm-playground-3d](https://medium.com/@l.mugnaini/basic-3d-rendering-in-svg-elm-playground-3d-d1e8846cd06e)
 
-Post in Medium: [Basic 3D rendering in SVG: elm-playground-3d](https://medium.com/@l.mugnaini/basic-3d-rendering-in-svg-elm-playground-3d-d1e8846cd06e)
+![Floating City - Tokyo](https://elm-playground-3d.netlify.com/images/968315a2-4e5f-4038-bad9-795e5cadf254.png)
 
 This is an experimental library built on top of [elm-playground](https://package.elm-lang.org/packages/evancz/elm-playground/latest/) to draw simple three-dimensional objects.
 
