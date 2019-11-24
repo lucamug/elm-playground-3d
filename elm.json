@@ -15,7 +15,8 @@
             "elm/time": "1.0.0",
             "ianmackenzie/elm-3d-camera": "2.0.0",
             "ianmackenzie/elm-geometry": "2.0.0",
-            "ianmackenzie/elm-units": "2.2.0"
+            "ianmackenzie/elm-units": "2.2.0",
+            "mdgriffith/elm-ui": "1.1.0"
         },
         "indirect": {
             "elm/url": "1.0.0",

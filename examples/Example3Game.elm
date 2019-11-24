@@ -7,7 +7,7 @@ import Set
 
 main : Program () (Game Memory) Msg
 main =
-    game view update ( 100, 100 )
+    game view update ( 0, 0 )
 
 
 type alias Memory =

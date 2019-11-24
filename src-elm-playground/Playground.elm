@@ -1137,12 +1137,12 @@ hexagon color radius =
 
 {-| Make octogons:
 
-import Playground exposing (..)
+    import Playground exposing (..)
 
-main =
-picture
-[ octagon red 100
-]
+    main =
+        picture
+            [ octagon red 100
+            ]
 
 You give the color and radius, so each point of this stop sign is 100 pixels
 from the center.
@@ -1178,7 +1178,7 @@ polygon color points =
 
     main =
         picture
-            [ image 96 96 "https://elm-lang.org/assets/turtle.gif"
+            [ image 96 96 "https://elm-lang.org/images/turtle.gif"
             ]
 
 You provide the width, height, and then the URL of the image you want to show.
