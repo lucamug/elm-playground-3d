@@ -4,6 +4,7 @@ import Playground exposing (..)
 import Playground3d exposing (..)
 
 
+main : Program () Screen PictureMsg
 main =
     picture
         [ group3d

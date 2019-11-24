@@ -4,10 +4,12 @@ import Playground exposing (..)
 import Playground3d exposing (..)
 
 
+main : Program () Animation Msg
 main =
     animation view
 
 
+view : Time -> List Shape
 view time =
     [ group3d
         [ cube lightPurple purple darkPurple 600

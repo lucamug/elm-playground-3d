@@ -14,7 +14,7 @@ module Playground exposing
     , white, lightGrey, grey, darkGrey, lightCharcoal, charcoal, darkCharcoal, black
     , lightGray, gray, darkGray
     , Number
-    , Animation, Game, Msg, changeMemory, gameInit, gameSubscriptions, gameUpdate, gameView, getMemory, pictureInit, pictureSubscriptions, pictureUpdate, pictureVew
+    , Animation, Game, Msg, PictureMsg, changeMemory, gameInit, gameSubscriptions, gameUpdate, gameView, getMemory, pictureInit, pictureSubscriptions, pictureUpdate, pictureVew
     )
 
 {-|
@@ -133,24 +133,38 @@ pictureVew shapes screen =
     }
 
 
-pictureInit : () -> ( Screen, Cmd msg )
+pictureInit : () -> ( Screen, Cmd PictureMsg )
 pictureInit () =
-    ( toScreen 600 600, Cmd.none )
-
-
-pictureUpdate : ( Int, Int ) -> a -> ( Screen, Cmd msg )
-pictureUpdate ( width, height ) _ =
-    ( toScreen (toFloat width) (toFloat height)
-    , Cmd.none
+    ( toScreen 600 600
+    , Task.perform PictureMsgGotViewport Dom.getViewport
     )
 
 
-pictureSubscriptions : a -> Sub ( Int, Int )
+pictureUpdate : PictureMsg -> a -> ( Screen, Cmd msg )
+pictureUpdate msg _ =
+    case msg of
+        PictureMsgResized width height ->
+            ( toScreen (toFloat width) (toFloat height)
+            , Cmd.none
+            )
+
+        PictureMsgGotViewport { viewport } ->
+            ( toScreen viewport.width viewport.height
+            , Cmd.none
+            )
+
+
+pictureSubscriptions : a -> Sub PictureMsg
 pictureSubscriptions _ =
-    E.onResize Tuple.pair
+    E.onResize PictureMsgResized
 
 
-picture : List Shape -> Program () Screen ( Int, Int )
+type PictureMsg
+    = PictureMsgResized Int Int
+    | PictureMsgGotViewport Dom.Viewport
+
+
+picture : List Shape -> Program () Screen PictureMsg
 picture shapes =
     Browser.document
         { init = pictureInit
@@ -703,7 +717,7 @@ Notice that in the `update` we use information from the keyboard to update the
 `x` and `y` values. These building blocks let you make pretty fancy games!
 
 -}
-game : (Computer -> memory -> List Shape) -> (Computer -> memory -> memory) -> memory -> Program ( Int, Int ) (Game memory) Msg
+game : (Computer -> memory -> List Shape) -> (Computer -> memory -> memory) -> memory -> Program () (Game memory) Msg
 game viewMemory updateMemory initialMemory =
     Browser.document
         { init = gameInit initialMemory
@@ -717,16 +731,16 @@ type Game memory
     = Game E.Visibility memory Computer
 
 
-gameInit : memory -> ( Int, Int ) -> ( Game memory, Cmd msg )
-gameInit initialMemory ( x, y ) =
+gameInit : memory -> () -> ( Game memory, Cmd Msg )
+gameInit initialMemory _ =
     ( Game E.Visible
         initialMemory
         { mouse = Mouse 0 0 False False False
         , keyboard = emptyKeyboard
-        , screen = toScreen (toFloat x) (toFloat y)
+        , screen = toScreen 600 600
         , time = Time (Time.millisToPosix 0)
         }
-    , Cmd.none
+    , Task.perform GotViewport Dom.getViewport
     )
 
 
@@ -815,7 +829,8 @@ gameSubscriptions (Game visibility _ computer) =
 
         E.Visible ->
             Sub.batch
-                [ if computer.mouse.down then
+                [ E.onResize Resized
+                , if computer.mouse.down then
                     E.onMouseUp (D.succeed MouseButtonUp)
 
                   else

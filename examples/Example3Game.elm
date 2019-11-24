@@ -5,12 +5,9 @@ import Playground3d exposing (..)
 import Set
 
 
-
--- main : Program () (Game ()) Msg
-
-
+main : Program () (Game Memory) Msg
 main =
-    game view update ( 0, 0 )
+    game view update ( 100, 100 )
 
 
 type alias Memory =
