@@ -6,7 +6,7 @@ import Playground3d exposing (..)
 
 main : Program () Screen PictureMsg
 main =
-    picture
+    picture []
         [ group3d
             [ cube darkPurple purple lightPurple 600
                 |> fade3d 0.5

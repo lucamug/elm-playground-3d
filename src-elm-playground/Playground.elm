@@ -14,7 +14,7 @@ module Playground exposing
     , white, lightGrey, grey, darkGrey, lightCharcoal, charcoal, darkCharcoal, black
     , lightGray, gray, darkGray
     , Number
-    , Animation, Game, Msg, PictureMsg, changeMemory, gameInit, gameSubscriptions, gameUpdate, gameView, getMemory, pictureInit, pictureSubscriptions, pictureUpdate, pictureVew
+    , Animation, Attributes, Game, Msg, PictureMsg, changeMemory, fixedScreen, fullScreen, gameInit, gameSubscriptions, gameUpdate, gameView, getMemory, pictureInit, pictureSubscriptions, pictureUpdate, pictureVew
     )
 
 {-|
@@ -129,15 +129,28 @@ import Time
 pictureVew : List Shape -> Screen -> Browser.Document msg
 pictureVew shapes screen =
     { title = "Playground"
-    , body = [ render screen Nothing shapes ]
+    , body =
+        [ render
+            { screen = screen
+            , maybeMsg = Nothing
+            , shapes = shapes
+            }
+        ]
     }
 
 
-pictureInit : () -> ( Screen, Cmd PictureMsg )
-pictureInit () =
-    ( toScreen 600 600
-    , Task.perform PictureMsgGotViewport Dom.getViewport
-    )
+pictureInit : List Attributes -> () -> ( Screen, Cmd PictureMsg )
+pictureInit attributes () =
+    case attributeSvgType attributes of
+        FixedScreen ( x, y ) ->
+            ( toScreen x y
+            , Cmd.none
+            )
+
+        _ ->
+            ( initScreen
+            , Task.perform PictureMsgGotViewport Dom.getViewport
+            )
 
 
 pictureUpdate : PictureMsg -> a -> ( Screen, Cmd msg )
@@ -154,9 +167,14 @@ pictureUpdate msg _ =
             )
 
 
-pictureSubscriptions : a -> Sub PictureMsg
-pictureSubscriptions _ =
-    E.onResize PictureMsgResized
+pictureSubscriptions : List Attributes -> a -> Sub PictureMsg
+pictureSubscriptions attributes _ =
+    case attributeSvgType attributes of
+        FullScreen ->
+            E.onResize PictureMsgResized
+
+        _ ->
+            Sub.none
 
 
 type PictureMsg
@@ -164,13 +182,43 @@ type PictureMsg
     | PictureMsgGotViewport Dom.Viewport
 
 
-picture : List Shape -> Program () Screen PictureMsg
-picture shapes =
+type Attributes
+    = FixedScreen ( Float, Float )
+    | FullScreen -- Default value
+
+
+attributeSvgType : List Attributes -> Attributes
+attributeSvgType attributes =
+    List.foldl
+        (\attribute acc ->
+            case attribute of
+                FixedScreen _ ->
+                    attribute
+
+                _ ->
+                    acc
+        )
+        FullScreen
+        attributes
+
+
+fixedScreen : ( Float, Float ) -> Attributes
+fixedScreen =
+    FixedScreen
+
+
+fullScreen : Attributes
+fullScreen =
+    FullScreen
+
+
+picture : List Attributes -> List Shape -> Program () Screen PictureMsg
+picture attributes shapes =
     Browser.document
-        { init = pictureInit
+        { init = pictureInit attributes
         , view = pictureVew shapes
         , update = pictureUpdate
-        , subscriptions = pictureSubscriptions
+        , subscriptions = pictureSubscriptions attributes
         }
 
 
@@ -574,13 +622,13 @@ Within `view` we can use functions like [`spin`](#spin), [`wave`](#wave),
 and [`zigzag`](#zigzag) to move and rotate our shapes.
 
 -}
-animation : (Time -> List Shape) -> Program () Animation Msg
-animation viewFrame =
+animation : List Attributes -> (Time -> List Shape) -> Program () Animation Msg
+animation attributes viewFrame =
     Browser.document
-        { init = animationInit
+        { init = animationInit attributes
         , view = animationView viewFrame
         , update = animationUpdate
-        , subscriptions = animationSubscriptions
+        , subscriptions = animationSubscriptions attributes
         }
 
 
@@ -594,15 +642,28 @@ animationView :
     -> { body : List (Html.Html msg), title : String }
 animationView viewFrame (Animation _ screen time) =
     { title = "Playground"
-    , body = [ render screen Nothing (viewFrame time) ]
+    , body =
+        [ render
+            { screen = screen
+            , maybeMsg = Nothing
+            , shapes = viewFrame time
+            }
+        ]
     }
 
 
-animationInit : () -> ( Animation, Cmd Msg )
-animationInit () =
-    ( Animation E.Visible (toScreen 600 600) (Time (Time.millisToPosix 0))
-    , Task.perform GotViewport Dom.getViewport
-    )
+animationInit : List Attributes -> () -> ( Animation, Cmd Msg )
+animationInit attributes () =
+    case attributeSvgType attributes of
+        FixedScreen ( x, y ) ->
+            ( Animation E.Visible (toScreen x y) (Time (Time.millisToPosix 0))
+            , Cmd.none
+            )
+
+        _ ->
+            ( Animation E.Visible initScreen (Time (Time.millisToPosix 0))
+            , Task.perform GotViewport Dom.getViewport
+            )
 
 
 animationUpdate : Msg -> Animation -> ( Animation, Cmd msg )
@@ -644,8 +705,24 @@ animationUpdate msg ((Animation v s t) as state) =
     )
 
 
-animationSubscriptions : Animation -> Sub Msg
-animationSubscriptions (Animation visibility _ _) =
+initScreen : Screen
+initScreen =
+    toScreen 600 600
+
+
+animationSubscriptions : List Attributes -> Animation -> Sub Msg
+animationSubscriptions attributes (Animation visibility _ _) =
+    let
+        fullScreenMode =
+            attributeSvgType attributes == FullScreen
+    in
+    --
+    -- TODO Need to detect mouse over and then start onAnimationFrame subscription
+    --
+    -- The problem is that animation doesn't have info about the mouse
+    -- so for the moment we keep the animation always active, ignoring
+    -- the attributes directives
+    --
     case visibility of
         E.Hidden ->
             E.onVisibilityChange VisibilityChanged
@@ -717,13 +794,13 @@ Notice that in the `update` we use information from the keyboard to update the
 `x` and `y` values. These building blocks let you make pretty fancy games!
 
 -}
-game : (Computer -> memory -> List Shape) -> (Computer -> memory -> memory) -> memory -> Program () (Game memory) Msg
-game viewMemory updateMemory initialMemory =
+game : List Attributes -> (Computer -> memory -> List Shape) -> (Computer -> memory -> memory) -> memory -> Program () (Game memory) Msg
+game attributes viewMemory updateMemory initialMemory =
     Browser.document
-        { init = gameInit initialMemory
+        { init = gameInit attributes initialMemory
         , view = gameView viewMemory
         , update = gameUpdate updateMemory
-        , subscriptions = gameSubscriptions
+        , subscriptions = gameSubscriptions attributes
         }
 
 
@@ -731,32 +808,47 @@ type Game memory
     = Game E.Visibility memory Computer
 
 
-gameInit : memory -> () -> ( Game memory, Cmd Msg )
-gameInit initialMemory _ =
-    ( Game E.Visible
-        initialMemory
-        { mouse = Mouse 0 0 False False False
-        , keyboard = emptyKeyboard
-        , screen = toScreen 600 600
-        , time = Time (Time.millisToPosix 0)
-        }
-    , Task.perform GotViewport Dom.getViewport
-    )
+gameInit : List Attributes -> memory -> () -> ( Game memory, Cmd Msg )
+gameInit attributes initialMemory _ =
+    case attributeSvgType attributes of
+        FixedScreen ( x, y ) ->
+            ( Game E.Visible
+                initialMemory
+                { mouse = Mouse 0 0 False False False
+                , keyboard = emptyKeyboard
+                , screen = toScreen x y
+                , time = Time (Time.millisToPosix 0)
+                }
+            , Cmd.none
+            )
+
+        _ ->
+            ( Game E.Visible
+                initialMemory
+                { mouse = Mouse 0 0 False False False
+                , keyboard = emptyKeyboard
+                , screen = initScreen
+                , time = Time (Time.millisToPosix 0)
+                }
+            , Task.perform GotViewport Dom.getViewport
+            )
 
 
 gameView : (Computer -> memory -> List Shape) -> Game memory -> Browser.Document Msg
 gameView viewMemory (Game _ memory computer) =
     { title = "Playground"
     , body =
-        [ render computer.screen
-            (Just
-                { mouseButtonDown = SvgMouseButtonDown
-                , onClick = SvgMouseClick
-                , onMouseOver = SvgMouseOver
-                , onMouseOut = SvgMouseOut
-                }
-            )
-            (viewMemory computer memory)
+        [ render
+            { screen = computer.screen
+            , maybeMsg =
+                Just
+                    { mouseButtonDown = SvgMouseButtonDown
+                    , onClick = SvgMouseClick
+                    , onMouseOver = SvgMouseOver
+                    , onMouseOut = SvgMouseOut
+                    }
+            , shapes = viewMemory computer memory
+            }
         ]
     }
 
@@ -817,36 +909,38 @@ gameUpdate updateMemory msg (Game vis memory computer) =
     )
 
 
-gameSubscriptions : Game memory -> Sub Msg
-gameSubscriptions (Game visibility _ computer) =
+gameSubscriptions : List Attributes -> Game memory -> Sub Msg
+gameSubscriptions attributes (Game visibility _ computer) =
     let
-        workOnlyInsideSvg =
-            True
+        fullScreenMode =
+            attributeSvgType attributes == FullScreen
     in
-    case visibility of
-        E.Hidden ->
-            E.onVisibilityChange VisibilityChanged
+    Sub.batch
+        [ E.onVisibilityChange VisibilityChanged
+        , case visibility of
+            E.Hidden ->
+                Sub.none
 
-        E.Visible ->
-            Sub.batch
-                [ E.onResize Resized
-                , if computer.mouse.down then
-                    E.onMouseUp (D.succeed MouseButtonUp)
+            E.Visible ->
+                Sub.batch
+                    [ if computer.mouse.down then
+                        E.onMouseUp (D.succeed MouseButtonUp)
 
-                  else
-                    Sub.none
-                , if workOnlyInsideSvg && (computer.mouse.over || computer.mouse.down) then
-                    Sub.batch
-                        [ E.onVisibilityChange VisibilityChanged
-                        , E.onMouseMove (D.map2 MouseMove (D.field "pageX" D.float) (D.field "pageY" D.float))
-                        , E.onKeyUp (D.map (KeyChanged False) (D.field "key" D.string))
-                        , E.onKeyDown (D.map (KeyChanged True) (D.field "key" D.string))
-                        , E.onAnimationFrame Tick
-                        ]
+                      else
+                        Sub.none
+                    , if fullScreenMode || (computer.mouse.over || computer.mouse.down) then
+                        Sub.batch
+                            [ E.onMouseMove (D.map2 MouseMove (D.field "pageX" D.float) (D.field "pageY" D.float))
+                            , E.onKeyUp (D.map (KeyChanged False) (D.field "key" D.string))
+                            , E.onKeyDown (D.map (KeyChanged True) (D.field "key" D.string))
+                            , E.onAnimationFrame Tick
+                            , E.onResize Resized
+                            ]
 
-                  else
-                    Sub.none
-                ]
+                      else
+                        Sub.none
+                    ]
+        ]
 
 
 
@@ -1694,20 +1788,35 @@ colorClamp number =
 
 
 -- RENDER
+-- render :
+--     Screen
+--     ->
+--         Maybe
+--             { mouseButtonDown : msg
+--             , onClick : msg
+--             , onMouseOver : msg
+--             , onMouseOut : msg
+--             }
+--     -> List Shape
+--     -> Html.Html msg
+-- render screen maybeMsg shapes =
 
 
 render :
-    Screen
-    ->
-        Maybe
-            { mouseButtonDown : msg
-            , onClick : msg
-            , onMouseOver : msg
-            , onMouseOut : msg
-            }
-    -> List Shape
+    { c
+        | maybeMsg :
+            Maybe
+                { a
+                    | mouseButtonDown : msg
+                    , onClick : msg
+                    , onMouseOut : msg
+                    , onMouseOver : msg
+                }
+        , screen : { b | bottom : Float, height : Float, left : Float, width : Float }
+        , shapes : List Shape
+    }
     -> Html.Html msg
-render screen maybeMsg shapes =
+render { screen, maybeMsg, shapes } =
     let
         w =
             String.fromFloat screen.width

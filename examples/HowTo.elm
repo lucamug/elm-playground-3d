@@ -218,11 +218,16 @@ main =
         }
 
 
+mode : Attributes
+mode =
+    fixedScreen ( 600, 600 )
+
+
 init : () -> ( Model, Cmd Msg )
 init _ =
     let
         ( model, cmd ) =
-            Playground.gameInit () ()
+            Playground.gameInit [ mode ] () ()
     in
     ( { graph1 = model
       , graph2 = model
@@ -277,9 +282,9 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     if model.isFocused && model.isVisible && model.isMoving then
         Sub.batch
-            [ Sub.map Graph1 <| Playground.gameSubscriptions model.graph1
-            , Sub.map Graph2 <| Playground.gameSubscriptions model.graph2
-            , Sub.map Graph3 <| Playground.gameSubscriptions model.graph3
+            [ Sub.map Graph1 <| Playground.gameSubscriptions [ mode ] model.graph1
+            , Sub.map Graph2 <| Playground.gameSubscriptions [ mode ] model.graph2
+            , Sub.map Graph3 <| Playground.gameSubscriptions [ mode ] model.graph3
             ]
 
     else

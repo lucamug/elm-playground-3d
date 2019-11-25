@@ -5,13 +5,18 @@ import Playground3d exposing (..)
 import Set
 
 
-main : Program () (Game Memory) Msg
-main =
-    game view update ( 0, 0 )
+attributes : List Attributes
+attributes =
+    []
 
 
 type alias Memory =
     ( Float, Float )
+
+
+init : Memory
+init =
+    ( 0, 0 )
 
 
 update : Computer -> Memory -> Memory
@@ -87,3 +92,8 @@ view computer ( x, y ) =
     , moveDown (computer.screen.top - 30) <| words black <| "Code at https://github.com/lucamug/elm-playground-3d"
     , moveDown (computer.screen.top - 10) <| words black <| "D = bring cube Down, S = Stop the animation, Mouse ⬌ = rotate all, Mouse ⬍ = move cube vertically, Arrow keys = move cube horizontally"
     ]
+
+
+main : Program () (Game Memory) Msg
+main =
+    game attributes view update init
