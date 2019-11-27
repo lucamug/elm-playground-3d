@@ -14,7 +14,7 @@ module Playground exposing
     , white, lightGrey, grey, darkGrey, lightCharcoal, charcoal, darkCharcoal, black
     , lightGray, gray, darkGray
     , Number
-    , Animation, Attributes, Game, Msg, PictureMsg, changeMemory, fixedScreen, fullScreen, gameInit, gameSubscriptions, gameUpdate, gameView, getMemory, pictureInit, pictureSubscriptions, pictureUpdate, pictureVew
+    , Animation, Attributes, Game, Msg, PictureMsg, changeMemory, fixedScreen, fullScreen, gameInit, gameSubscriptions, gameUpdate, gameView, getMemory, pictureInit, pictureSubscriptions, pictureUpdate, pictureView, toScreen
     )
 
 {-|
@@ -126,8 +126,8 @@ import Time
             ]
 
 -}
-pictureVew : List Shape -> Screen -> Browser.Document msg
-pictureVew shapes screen =
+pictureView : List Shape -> Screen -> Browser.Document msg
+pictureView shapes screen =
     { title = "Playground"
     , body =
         [ render
@@ -216,7 +216,7 @@ picture : List Attributes -> List Shape -> Program () Screen PictureMsg
 picture attributes shapes =
     Browser.document
         { init = pictureInit attributes
-        , view = pictureVew shapes
+        , view = pictureView shapes
         , update = pictureUpdate
         , subscriptions = pictureSubscriptions attributes
         }

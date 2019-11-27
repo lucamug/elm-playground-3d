@@ -32,7 +32,7 @@ colorBackgroundCard =
 
 colorFontTitle : Element.Color
 colorFontTitle =
-    Element.rgb 0 0.5 0.2
+    Element.rgb 0 0.4 0.5
 
 
 colorBorder : Element.Color
@@ -291,6 +291,52 @@ subscriptions model =
         Sub.none
 
 
+twoD : String -> List Shape -> Element msg
+twoD code shapes =
+    row [ width <| px 400 ]
+        [ paragraph [] [ text code ]
+        , el [ alignRight, width <| px 200 ] <|
+            html <|
+                Html.div [] <|
+                    .body
+                        (pictureView
+                            [ group
+                                [ circle gray 4
+                                , circle white 3.8
+                                , rectangle gray 10 0.2 |> Playground.rotate 90 |> move -5 0
+                                , rectangle gray 10 0.1 |> Playground.rotate 90 |> move -4 0
+                                , rectangle gray 10 0.1 |> Playground.rotate 90 |> move -3 0
+                                , rectangle gray 10 0.1 |> Playground.rotate 90 |> move -2 0
+                                , rectangle gray 10 0.1 |> Playground.rotate 90 |> move -1 0
+                                , rectangle gray 10 0.2 |> Playground.rotate 90
+                                , rectangle gray 10 0.1 |> Playground.rotate 90 |> move 1 0
+                                , rectangle gray 10 0.1 |> Playground.rotate 90 |> move 2 0
+                                , rectangle gray 10 0.1 |> Playground.rotate 90 |> move 3 0
+                                , rectangle gray 10 0.1 |> Playground.rotate 90 |> move 4 0
+                                , rectangle gray 10 0.2 |> Playground.rotate 90 |> move 5 0
+                                , rectangle gray 10 0.2 |> move 0 -5
+                                , rectangle gray 10 0.1 |> move 0 -4
+                                , rectangle gray 10 0.1 |> move 0 -3
+                                , rectangle gray 10 0.1 |> move 0 -2
+                                , rectangle gray 10 0.1 |> move 0 -1
+                                , rectangle gray 10 0.2
+                                , rectangle gray 10 0.1 |> move 0 1
+                                , rectangle gray 10 0.1 |> move 0 2
+                                , rectangle gray 10 0.1 |> move 0 3
+                                , rectangle gray 10 0.1 |> move 0 4
+                                , rectangle gray 10 0.2 |> move 0 5
+                                , words gray "-5,-5" |> Playground.scale 0.06 |> move -5.7 -5.7
+                                , words gray "-5, 5" |> Playground.scale 0.06 |> move -5.7 5.7
+                                , words gray " 5, 5" |> Playground.scale 0.06 |> move 5.7 5.7
+                                , words gray " 5,-5" |> Playground.scale 0.06 |> move 5.7 -5.7
+                                ]
+                            , group shapes |> fade 0.7
+                            ]
+                            (toScreen 14 14)
+                        )
+        ]
+
+
 view : Model -> Html.Html Msg
 view model =
     let
@@ -305,9 +351,30 @@ view model =
     in
     layout [ padding paddingNormal ] <|
         column [ spacing spacingNormal, width fill ]
-            [ el attrsTitle <| text "Data 3D"
+            [ el attrsTitle <| text "Example"
             , column [ spacing spacingNormal, width fill ]
-                [ contentShape3d1
+                [ twoD "circle blue 4" [ circle blue 4 ]
+                , twoD "oval blue 8 6" [ oval blue 8 6 ]
+                , twoD "square blue 8" [ square blue 8 ]
+                , twoD "rectangle blue 8 6" [ rectangle blue 8 6 ]
+                , twoD "triangle blue 4" [ triangle blue 4 ]
+                , twoD "pentagon blue 4" [ pentagon blue 4 ]
+                , twoD "hexagon blue 4" [ hexagon blue 4 ]
+                , twoD "octagon blue 4" [ octagon blue 4 ]
+                , twoD "polygon blue[ (-4, 0), (-1, -1), (0, -4), (1, -1), (4, 0), (1, 1), (0, 4), (-1, 1) ]"
+                    [ polygon blue
+                        [ ( -4, 0 )
+                        , ( -1, -1 )
+                        , ( 0, -4 )
+                        , ( 1, -1 )
+                        , ( 4, 0 )
+                        , ( 1, 1 )
+                        , ( 0, 4 )
+                        , ( -1, 1 )
+                        ]
+                    ]
+                , twoD "words \"test\"" [ words blue "test" |> Playground.scale 0.3 ]
+                , contentShape3d1
                 , contentShape3d2
                 , contentShape3d3
                 ]
