@@ -2001,7 +2001,7 @@ renderPolygon color coordinates x y angle s alpha =
 
 addPoint : ( Float, Float ) -> String -> String
 addPoint ( x, y ) str =
-    str ++ String.fromFloat x ++ "," ++ String.fromFloat y ++ " "
+    str ++ String.fromFloat x ++ "," ++ String.fromFloat -y ++ " "
 
 
 

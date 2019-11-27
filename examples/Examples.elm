@@ -325,10 +325,10 @@ twoD code shapes =
                                 , rectangle gray 10 0.1 |> move 0 3
                                 , rectangle gray 10 0.1 |> move 0 4
                                 , rectangle gray 10 0.2 |> move 0 5
-                                , words gray "-5,-5" |> Playground.scale 0.06 |> move -5.7 -5.7
-                                , words gray "-5, 5" |> Playground.scale 0.06 |> move -5.7 5.7
-                                , words gray " 5, 5" |> Playground.scale 0.06 |> move 5.7 5.7
-                                , words gray " 5,-5" |> Playground.scale 0.06 |> move 5.7 -5.7
+                                , words gray "-5,-5" |> Playground.scale 0.06 |> move -4.5 -5.8
+                                , words gray "-5, 5" |> Playground.scale 0.06 |> move -4.5 5.8
+                                , words gray " 5, 5" |> Playground.scale 0.06 |> move 4.5 5.8
+                                , words gray " 5,-5" |> Playground.scale 0.06 |> move 4.5 -5.8
                                 ]
                             , group shapes |> fade 0.7
                             ]
