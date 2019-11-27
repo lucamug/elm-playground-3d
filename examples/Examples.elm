@@ -1,4 +1,4 @@
-module HowTo exposing (main)
+module Examples exposing (main)
 
 import Browser
 import Element exposing (..)
