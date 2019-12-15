@@ -53,10 +53,10 @@ view computer ( x, y ) =
                         , ( 1000, 0, 0 )
                         ]
                     , (if Set.member "d" computer.keyboard.keys then
-                        move3d (clamp 100 900 (500 - x * 30)) (clamp 100 900 (500 - y * 30)) 100
+                        move3d (clamp 100 900 (500 - x * 30)) (clamp 100 900 (500 + y * 30)) 100
 
                        else
-                        move3d (500 - x * 30) (500 - y * 30) (500 + computer.mouse.y * 2)
+                        move3d (500 - x * 30) (500 - y * 30) (500 - computer.mouse.y * 2)
                       )
                       <|
                         (if Set.member "s" computer.keyboard.keys then

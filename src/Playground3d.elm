@@ -4,6 +4,8 @@ module Playground3d exposing
     , camera
     , camera1
     , camera2
+    , camera3
+    , camera4
     , cube
     , fade3d
     , group3d
@@ -283,3 +285,13 @@ camera1 =
 camera2 : Point3d a -> Maybe (Point2d a)
 camera2 =
     camera ( 2300, 2300, 800 ) ( 0, 0, -450 )
+
+
+camera3 : Point3d a -> Maybe (Point2d a)
+camera3 =
+    camera ( 2000, 2000, 1500 ) ( 0, 1.6, -908 )
+
+
+camera4 : Point3d a -> Maybe (Point2d a)
+camera4 =
+    camera ( 50, 50, 50 ) ( -50, -50, -50 )

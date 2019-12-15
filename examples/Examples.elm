@@ -98,7 +98,7 @@ spacingNormal =
 view3d1 : (Playground.Msg -> msg) -> Playground.Game memory -> Element msg
 view3d1 msgGraph modelGraph =
     row []
-        [ paragraph [ paddingEach { top = paddingNormal, right = 0, bottom = 0, left = paddingNormal } ] [ text "Lorem ipsum dolor 1" ]
+        [ paragraph [ paddingEach { top = paddingNormal, right = 0, bottom = 0, left = paddingNormal } ] [ text "3D Example 1" ]
         , el
             (cardNormal
                 ++ [ padding 0
@@ -144,7 +144,7 @@ view3d1 msgGraph modelGraph =
 view3d2 : (Playground.Msg -> msg) -> Playground.Game memory -> Element msg
 view3d2 msgGraph modelGraph =
     row []
-        [ paragraph [ paddingEach { top = paddingNormal, right = 0, bottom = 0, left = paddingNormal } ] [ text "Lorem ipsum dolor 2" ]
+        [ paragraph [ paddingEach { top = paddingNormal, right = 0, bottom = 0, left = paddingNormal } ] [ text "3D Example 2" ]
         , el (cardNormal ++ [ padding 0, width fill ]) <|
             html <|
                 Html.map msgGraph <|
@@ -171,7 +171,7 @@ view3d2 msgGraph modelGraph =
 view3d3 : (Playground.Msg -> msg) -> Playground.Game memory -> Element msg
 view3d3 msgGraph modelGraph =
     row []
-        [ paragraph [ paddingEach { top = paddingNormal, right = 0, bottom = 0, left = paddingNormal } ] [ text "Lorem ipsum dolor 2" ]
+        [ paragraph [ paddingEach { top = paddingNormal, right = 0, bottom = 0, left = paddingNormal } ] [ text "3D Example 2" ]
         , el (cardNormal ++ [ padding 0, width fill ]) <|
             html <|
                 Html.map msgGraph <|
@@ -337,6 +337,62 @@ twoD code shapes =
         ]
 
 
+
+-- TODO
+--
+-- Need to convert the grid into 3D so I can put object in 3D
+-- Create Rectangle3d
+
+
+grid =
+    [ circle gray 4
+    , circle white 3.8
+    , rectangle gray 10 0.2 |> Playground.rotate 90 |> move -5 0
+    , rectangle gray 10 0.1 |> Playground.rotate 90 |> move -4 0
+    , rectangle gray 10 0.1 |> Playground.rotate 90 |> move -3 0
+    , rectangle gray 10 0.1 |> Playground.rotate 90 |> move -2 0
+    , rectangle gray 10 0.1 |> Playground.rotate 90 |> move -1 0
+    , rectangle gray 10 0.2 |> Playground.rotate 90
+    , rectangle gray 10 0.1 |> Playground.rotate 90 |> move 1 0
+    , rectangle gray 10 0.1 |> Playground.rotate 90 |> move 2 0
+    , rectangle gray 10 0.1 |> Playground.rotate 90 |> move 3 0
+    , rectangle gray 10 0.1 |> Playground.rotate 90 |> move 4 0
+    , rectangle gray 10 0.2 |> Playground.rotate 90 |> move 5 0
+    , rectangle gray 10 0.2 |> move 0 -5
+    , rectangle gray 10 0.1 |> move 0 -4
+    , rectangle gray 10 0.1 |> move 0 -3
+    , rectangle gray 10 0.1 |> move 0 -2
+    , rectangle gray 10 0.1 |> move 0 -1
+    , rectangle gray 10 0.2
+    , rectangle gray 10 0.1 |> move 0 1
+    , rectangle gray 10 0.1 |> move 0 2
+    , rectangle gray 10 0.1 |> move 0 3
+    , rectangle gray 10 0.1 |> move 0 4
+    , rectangle gray 10 0.2 |> move 0 5
+    , words gray "-5,-5" |> Playground.scale 0.06 |> move -4.5 -5.8
+    , words gray "-5, 5" |> Playground.scale 0.06 |> move -4.5 5.8
+    , words gray " 5, 5" |> Playground.scale 0.06 |> move 4.5 5.8
+    , words gray " 5,-5" |> Playground.scale 0.06 |> move 4.5 -5.8
+    ]
+
+
+threeD : String -> List Shape -> Element msg
+threeD code shapes =
+    row [ width <| px 400 ]
+        [ paragraph [] [ text code ]
+        , el [ alignRight, width <| px 200 ] <|
+            html <|
+                Html.div [] <|
+                    .body
+                        (pictureView
+                            [ group grid
+                            , group shapes |> fade 0.7
+                            ]
+                            (toScreen 14 14)
+                        )
+        ]
+
+
 view : Model -> Html.Html Msg
 view model =
     let
@@ -361,7 +417,7 @@ view model =
                 , twoD "pentagon blue 4" [ pentagon blue 4 ]
                 , twoD "hexagon blue 4" [ hexagon blue 4 ]
                 , twoD "octagon blue 4" [ octagon blue 4 ]
-                , twoD "polygon blue[ (-4, 0), (-1, -1), (0, -4), (1, -1), (4, 0), (1, 1), (0, 4), (-1, 1) ]"
+                , twoD "polygon blue [ (-4, 0), (-1, -1), (0, -4), (1, -1), (4, 0), (1, 1), (0, 4), (-1, 1) ]"
                     [ polygon blue
                         [ ( -4, 0 )
                         , ( -1, -1 )
@@ -374,6 +430,20 @@ view model =
                         ]
                     ]
                 , twoD "words \"test\"" [ words blue "test" |> Playground.scale 0.3 ]
+                , threeD "3D test" [ cube lightBlue blue darkBlue 8 |> shape3dto2d camera3 ]
+                , threeD "3D test" <|
+                    let
+                        size =
+                            40
+                    in
+                    [ [ polygon3d darkGray [ ( 0, 0, 0 ), ( size, 0, 0 ), ( size, 0, size ), ( 0, 0, size ) ]
+
+                      -- , polygon3d gray [ ( 0, 0, 0 ), ( 0, size, 0 ), ( 0, size, size ), ( 0, 0, size ) ]
+                      -- , polygon3d lightGray [ ( 0, 0, 0 ), ( size, 0, 0 ), ( size, size, 0 ), ( 0, size, 0 ) ]
+                      ]
+                        |> group3d
+                        |> shape3dto2d camera3
+                    ]
                 , contentShape3d1
                 , contentShape3d2
                 , contentShape3d3
